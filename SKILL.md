@@ -1,5 +1,5 @@
 ---
-name: sheqi-report
+name: sheqi-report-extension
 description: 12377.cn 涉企侵权举报批量自动提交助手。批量/自动完成涉企举报、导入舆情表格或链接、多主体管理、验证码自动识别提交（含风控自适应降频）、生成举报信函、导出今日提交Excel（含审核码）。触发词："sheqi-report"、"涉企举报"、"12377 涉企"、"批量举报"、"企业侵权举报"、"涉企侵权举报"、"我要举报某企业"。
 scope: user
 is_public: true

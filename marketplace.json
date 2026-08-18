@@ -1,8 +1,8 @@
 {
   "i18n": {
     "name": {
-      "en": "sheqi-report",
-      "zh-CN": "sheqi-report"
+      "en": "sheqi-report-extension",
+      "zh-CN": "sheqi-report-extension"
     },
     "description": {
       "en": "Automated assistant for enterprise infringement reporting on 12377.cn (CAC): multi-subject profiles, auto-import (JSON/CSV/TSV/XLSX/pasted text), Playwright auto form-filling, cloud OCR captcha recognition (PaddleOCR online API, token-based), merged submissions, result tracking, and report letter generation.",
@@ -13,7 +13,7 @@
       "zh-CN": "# Sheqi Report（涉企举报助手）\n\n在 12377.cn 上批量完成涉企侵权举报：多主体档案管理、任意格式表格自动导入（JSON/CSV/TSV/XLSX/粘贴文本）、Playwright 自动填表、云端 OCR 验证码识别（PaddleOCR 在线 API，token 配置，本机不装识别模型）、合并投递、结果跟踪、举报信函生成。\n\n快速开始：`python sheqi.py setup` 准备环境；`subject add/list/set` 管理主体；`import` 导入记录；`run --dry-run` 试跑；`run --headless` 正式提交。完整工作流见 SKILL.md。"
     }
   },
-  "name": "sheqi-report",
+  "name": "sheqi-report-extension",
   "owner": {
     "name": "UserOps",
     "email": ""
