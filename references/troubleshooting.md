@@ -77,13 +77,13 @@ def refresh_captcha(page):
 **症状**：PaddleOCR 在线 API 报 `401 Unauthorized`（`AuthError` / `Authentication failed`）。
 **根因**：token 未配置、为空或已失效。
 **解决**：
-1. `_paddle_token()` **仅从环境变量 `PADDLEOCR_ACCESS_TOKEN` 读取**（不落文件）；
-2. token 失效时，去 AI Studio（https://aistudio.baidu.com/paddleocr）重新申请并更新环境变量；
-3. 确认环境变量已正确设置（`os.environ.get("PADDLEOCR_ACCESS_TOKEN")` 非空）。
+1. `_paddle_token()` **优先从环境变量 `PADDLEOCR_ACCESS_TOKEN` 读取**，未设置时回退到**内嵌默认 token**（不落文件）；
+2. 若内嵌共享 token 失效，设置环境变量 `PADDLEOCR_ACCESS_TOKEN` 覆盖为自有 token，去 AI Studio（https://aistudio.baidu.com/paddleocr）重新申请；
+3. 确认 token 生效：`os.environ.get("PADDLEOCR_ACCESS_TOKEN")` 非空，或 `_paddle_token()` 返回非空。
 
 ### 2.2 凭据配置说明
 
-`_paddle_token()` **仅从环境变量 `PADDLEOCR_ACCESS_TOKEN` 读取**。
+`_paddle_token()` **优先读环境变量 `PADDLEOCR_ACCESS_TOKEN`，未设置时回退到内嵌共享 token**（随 skill 分发，开箱即用）。
 识别走 PaddleOCR 在线 API（PP-OCRv6），**本机不安装识别模型**；识别失败转人工输入。
 
 ## 三、进程管理（Windows）

@@ -50,7 +50,7 @@
 ## 验证码 OCR
 
 - 验证码为数学表达式（如 `9+9=?`）。先抓取 `#verifycode_id` 当前显示的图（`el.screenshot()`，与提交绑定一致）。
-- 识别：PaddleOCR 在线 API（PP-OCRv6），token 通过环境变量 `PADDLEOCR_ACCESS_TOKEN` 提供。**本机不安装本地识别模型**。
+- 识别：PaddleOCR 在线 API（PP-OCRv6），token 优先读环境变量 `PADDLEOCR_ACCESS_TOKEN`，未设置时回退到内嵌共享 token（开箱即用）。**本机不安装本地识别模型**。
 - 注意：`a÷b` 不整除视为识别失败；`a,b>20` 且两位数是 OCR 拼字，取首字符。
 - 识别失败：点击验证码刷新重试，最多 4 次；仍失败转人工输入。
 

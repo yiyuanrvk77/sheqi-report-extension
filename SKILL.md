@@ -3,7 +3,7 @@ name: sheqi-report-extension
 description: 12377.cn 涉企侵权举报批量自动提交助手。批量/自动完成涉企举报、导入舆情表格或链接、多主体管理、验证码自动识别提交（含风控自适应降频）、生成举报信函、导出今日提交Excel（含审核码）。触发词："sheqi-report"、"涉企举报"、"12377 涉企"、"批量举报"、"企业侵权举报"、"涉企侵权举报"、"我要举报某企业"。
 scope: user
 is_public: true
-version: 1.15.0
+version: 1.16.0
 ---
 
 # sheqi-report 涉企侵权举报批量提交助手
@@ -36,7 +36,25 @@ python sheqi.py setup
 #   uv run --with playwright,openpyxl,python-docx,pillow sheqi.py setup
 ```
 
-验证码识别走 **PaddleOCR 在线 API**（PP-OCRv6），token 通过**环境变量 `PADDLEOCR_ACCESS_TOKEN`** 配置（不落文件、不入 git），本机不安装识别模型；未配置 token 或识别失败时自动转人工输入。
+验证码识别走 **PaddleOCR 在线 API**（PP-OCRv6），本机不安装识别模型。token 读取优先级：
+
+1. **环境变量 `PADDLEOCR_ACCESS_TOKEN`**（最高优先级）：用户可在本机自行配置覆盖；
+2. **内嵌默认 token**：skill 已内置一个共享 token 随代码分发，未配置环境变量时自动回退使用，**开箱即用**（所有市场用户共享该 token，消耗其所有者的 AI Studio 额度）。
+
+识别失败时自动转人工输入。
+
+## 材料/文档图片 OCR（识别投诉函、营业执照、身份证等文字）
+
+当需要读取用户上传的**材料图片文字**（投诉函、营业执照、身份证、授权委托书、截图等）时，**直接用内置 `ocr` 命令**：
+
+```bash
+python sheqi.py ocr 图片1.jpg 图片2.png ...
+```
+
+- 内置共享 token 直连 PaddleOCR 在线 API（`paddleocr.aistudio-app.com`），**开箱即用，无需任何配置**。
+- `paddleocr` MCP 工具与内置 `ocr` 命令调用的是同一个 PaddleOCR 后端，但 MCP 需在系统设置单独填引擎+Token（配置文件 `~/.halo/kb-ocr-config.json`）；若未配置会报「OCR 未配置」，此时直接用内置 `ocr` 命令即可。
+- **不要**用图片分析 SubAgent（`Task` + `imagePaths`）——它依赖独立视觉模型 API key，通常未配置会报 `AI_LoadAPIKeyError`。
+- 识别结果直接打印，供整理举报内容/核对主体信息用。
 
 ## 命令用法
 

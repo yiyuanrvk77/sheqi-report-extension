@@ -800,10 +800,16 @@ def launch_browser(headless=True):
 PADDLEOCR_BASE = "https://paddleocr.aistudio-app.com"
 
 
+# 内嵌默认 token：随 skill 分发，供市场所有用户开箱即用验证码自动识别。
+# 用户可在本机设置环境变量 PADDLEOCR_ACCESS_TOKEN 覆盖此默认值（优先级更高）。
+PADDLEOCR_DEFAULT_TOKEN = "bc89c6cf00200eaf4376ccca69eeb56d5cf599c8"
+
+
 def _paddle_token():
-    """返回 PaddleOCR 在线 API token。仅从环境变量 PADDLEOCR_ACCESS_TOKEN 读取。"""
+    """返回 PaddleOCR 在线 API token。优先读环境变量 PADDLEOCR_ACCESS_TOKEN，
+    未设置时回退到内嵌默认 token（开箱即用）。"""
     tok = os.environ.get("PADDLEOCR_ACCESS_TOKEN", "").strip()
-    return tok or None
+    return tok or PADDLEOCR_DEFAULT_TOKEN
 
 
 def _paddle_ocr_text(img_bytes, timeout=60):
@@ -864,6 +870,21 @@ def _paddle_ocr_text(img_bytes, timeout=60):
         if state == "failed":
             return None
     return None
+
+
+def ocr_image(path_or_bytes, timeout=90):
+    """识别任意图片/文档文字（材料 OCR：投诉函、营业执照、身份证、授权书等）。
+
+    接受文件路径或 bytes，返回识别文本；失败返回 None。
+    走 PaddleOCR 在线 API（内置 token，开箱即用），本机不装本地模型。
+    与验证码 OCR（ocr_captcha，多路预处理+算式解析）不同，本函数只做纯文本提取。
+    """
+    if isinstance(path_or_bytes, (str, os.PathLike)):
+        with open(path_or_bytes, "rb") as f:
+            img_bytes = f.read()
+    else:
+        img_bytes = path_or_bytes
+    return _paddle_ocr_text(img_bytes, timeout=timeout)
 
 
 def parse_math(raw):

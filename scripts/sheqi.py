@@ -153,6 +153,14 @@ def cmd_letter(args):
     print("举报信函已生成: %s" % path)
 
 
+def cmd_ocr(args):
+    for p in args.images:
+        txt = S.ocr_image(p)
+        print("==== %s" % p)
+        print(txt if txt else "（识别失败或无文字）")
+        print()
+
+
 def cmd_export(args):
     path, n = S.export_today_excel(subject=args.subject, date=args.date)
     if not path:
@@ -288,6 +296,10 @@ def build_parser():
     p.add_argument("--cool-seconds", type=int, default=300, help="主动冷却秒数（默认 300=5 分钟）")
     p.add_argument("--content", help="自定义举报内容模板文件（≤500字）")
     p.set_defaults(func=cmd_run)
+
+    p = sub.add_parser("ocr", help="识别图片/材料文字（投诉函、营业执照、身份证等，PaddleOCR 在线）")
+    p.add_argument("images", nargs="+", help="图片文件路径（可多个）")
+    p.set_defaults(func=cmd_ocr)
 
     p = sub.add_parser("export", help="导出指定日期已提交记录 Excel（含查询码）")
     p.add_argument("--subject", help="主体名（默认全部）")

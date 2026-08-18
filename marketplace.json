@@ -41,8 +41,8 @@
     ],
     "author": "UserOps",
     "created": "2026-08-10",
-    "version": "1.15.0",
-    "description": "12377.cn 涉企侵权举报自动提交助手（含风控自适应降频、主动冷却、名称填满、内容模板、中断恢复、贪心合并投递）。"
+    "version": "1.16.0",
+    "description": "12377.cn 涉企侵权举报自动提交助手（含风控自适应降频、主动冷却、名称填满、内容模板、中断恢复、贪心合并投递、材料图片 OCR）。"
   },
   "environment": [
     {
@@ -55,8 +55,8 @@
         "zh": "PaddleOCR 访问令牌"
       },
       "description": {
-        "en": "AI Studio PaddleOCR online API access token for captcha recognition (fallback to manual input if unset).",
-        "zh": "AI Studio PaddleOCR 在线 API 访问令牌，用于验证码识别（未配置时转人工输入）。"
+        "en": "AI Studio PaddleOCR online API access token for captcha recognition. Overrides the built-in shared token when set; manual input fallback on recognition failure.",
+        "zh": "AI Studio PaddleOCR 在线 API 访问令牌，用于验证码识别。设置后覆盖内嵌共享 token；识别失败时转人工输入。"
       },
       "placeholder": {
         "en": "paste token here",
@@ -66,7 +66,7 @@
       "order": 1
     }
   ],
-  "version": "1.15.0",
+  "version": "1.16.0",
   "author": {
     "name": "UserOps",
     "email": ""
@@ -83,6 +83,34 @@
     ]
   },
   "changelog": [
+    {
+      "version": "1.16.0",
+      "date": "2026-08-18",
+      "changes": [
+        {
+          "type": "added",
+          "description": "新增 ocr 子命令：识别材料/文档图片文字（投诉函、营业执照、身份证、授权委托书、截图等），直连 PaddleOCR 在线 API（内置共享 token，开箱即用），无需本地模型"
+        },
+        {
+          "type": "added",
+          "description": "sheqi_lib.py 新增公开函数 ocr_image()：封装 PaddleOCR 在线 API 纯文本提取，与验证码 OCR（多路预处理+算式解析）区分"
+        },
+        {
+          "type": "changed",
+          "description": "SKILL.md 新增「材料/文档图片 OCR」指引：明确识别材料图片直接用 sheqi.py ocr，禁用图片分析 SubAgent（依赖独立视觉 key，未配置报 AI_LoadAPIKeyError），说明 paddleocr MCP 与内置命令为同一后端"
+        }
+      ]
+    },
+    {
+      "version": "1.15.0",
+      "date": "2026-08-18",
+      "changes": [
+        {
+          "type": "changed",
+          "description": "Skill updated via upload"
+        }
+      ]
+    },
     {
       "version": "1.15.0",
       "date": "2026-08-18",
@@ -418,6 +446,5 @@
       ]
     }
   ],
-  "is_public": true,
-  "updatedAt": "2026-08-18T07:45:00"
+  "is_public": true
 }

@@ -1,4 +1,4 @@
-# 验证码识别走 PaddleOCR 在线 API（token 通过环境变量 PADDLEOCR_ACCESS_TOKEN 提供），本机不安装识别模型
+# 验证码识别走 PaddleOCR 在线 API（token 优先读环境变量 PADDLEOCR_ACCESS_TOKEN，未设置回退到内嵌共享 token），本机不安装识别模型
 playwright>=1.40.0
 openpyxl>=3.1.0
 python-docx>=1.1.0
