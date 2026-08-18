@@ -1,0 +1,4 @@
+interface:
+  display_name: "涉企举报助手"
+  short_description: "批量完成12377涉企侵权举报：多主体、自动导入、OCR自动填表提交"
+  default_prompt: "Use $sheqi-report to file 12377.cn 涉企侵权举报 reports for the user's enterprise subject(s)"

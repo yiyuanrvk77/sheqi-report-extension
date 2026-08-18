@@ -1,0 +1,423 @@
+{
+  "i18n": {
+    "name": {
+      "en": "sheqi-report",
+      "zh-CN": "sheqi-report"
+    },
+    "description": {
+      "en": "Automated assistant for enterprise infringement reporting on 12377.cn (CAC): multi-subject profiles, auto-import (JSON/CSV/TSV/XLSX/pasted text), Playwright auto form-filling, cloud OCR captcha recognition (PaddleOCR online API, token-based), merged submissions, result tracking, and report letter generation.",
+      "zh-CN": "12377.cn 涉企侵权举报自动提交助手。当用户需要提交/批量/自动完成涉企举报、网信办举报、12377 举报，导入舆情表格或链接批量举报，管理多个举报主体（被侵权企业），自动识别验证码提交，生成举报信函，或导出今日提交 Excel（含审核码）时使用本 skill。"
+    },
+    "longDescription": {
+      "en": "# Sheqi Report\n\nAutomated enterprise infringement reporting on 12377.cn: multi-subject profiles, auto-import of public-opinion tables (JSON/CSV/TSV/XLSX/pasted text), Playwright auto form-filling, cloud OCR captcha recognition (PaddleOCR online API, token-based, no local OCR models), merged submissions, result tracking, and report letter generation.\n\nQuick start: `python sheqi.py setup` prepares the environment; `subject add/list/set` manages subjects; `import` imports records; `run --dry-run` tests without submitting; `run --headless` submits. See SKILL.md for the full workflow.",
+      "zh-CN": "# Sheqi Report（涉企举报助手）\n\n在 12377.cn 上批量完成涉企侵权举报：多主体档案管理、任意格式表格自动导入（JSON/CSV/TSV/XLSX/粘贴文本）、Playwright 自动填表、云端 OCR 验证码识别（PaddleOCR 在线 API，token 配置，本机不装识别模型）、合并投递、结果跟踪、举报信函生成。\n\n快速开始：`python sheqi.py setup` 准备环境；`subject add/list/set` 管理主体；`import` 导入记录；`run --dry-run` 试跑；`run --headless` 正式提交。完整工作流见 SKILL.md。"
+    }
+  },
+  "name": "sheqi-report",
+  "owner": {
+    "name": "UserOps",
+    "email": ""
+  },
+  "plugins": [
+    {
+      "name": "sheqi-report-plugin",
+      "skills": [
+        "./"
+      ],
+      "source": "./",
+      "strict": false,
+      "description": "网信办 12377.cn 涉企侵权举报全自动助手。多主体档案管理、自动格式导入、Playwright 自动填表、云端 OCR 验证码识别、提交结果跟踪、举报信函生成、今日提交 Excel 导出（含审核码）。"
+    }
+  ],
+  "metadata": {
+    "tags": [
+      "举报",
+      "12377",
+      "网信办",
+      "涉企侵权",
+      "自动化",
+      "OCR",
+      "验证码"
+    ],
+    "author": "UserOps",
+    "created": "2026-08-10",
+    "version": "1.15.0",
+    "description": "12377.cn 涉企侵权举报自动提交助手（含风控自适应降频、主动冷却、名称填满、内容模板、中断恢复、贪心合并投递）。"
+  },
+  "environment": [
+    {
+      "name": "PADDLEOCR_ACCESS_TOKEN",
+      "type": "string",
+      "required": false,
+      "secret": true,
+      "label": {
+        "en": "PaddleOCR Access Token",
+        "zh": "PaddleOCR 访问令牌"
+      },
+      "description": {
+        "en": "AI Studio PaddleOCR online API access token for captcha recognition (fallback to manual input if unset).",
+        "zh": "AI Studio PaddleOCR 在线 API 访问令牌，用于验证码识别（未配置时转人工输入）。"
+      },
+      "placeholder": {
+        "en": "paste token here",
+        "zh": "粘贴 token"
+      },
+      "group": "Authentication",
+      "order": 1
+    }
+  ],
+  "version": "1.15.0",
+  "author": {
+    "name": "UserOps",
+    "email": ""
+  },
+  "security": {
+    "level": "moderate",
+    "permissions": []
+  },
+  "compatibility": {
+    "platforms": [
+      "windows",
+      "macos",
+      "linux"
+    ]
+  },
+  "changelog": [
+    {
+      "version": "1.15.0",
+      "date": "2026-08-18",
+      "changes": [
+        {
+          "type": "changed",
+          "description": "URL 拼接总长上限由 480 调整为 500：group_records_by_date / merge_records_to_queue / run_batch 三处 url_max 默认值及注释打印文案统一为 500（贪心封组仍按 ≤500 封组，排序/递归/不跨日期策略不变）"
+        }
+      ]
+    },
+    {
+      "version": "1.14.0",
+      "date": "2026-08-18",
+      "changes": [
+        {
+          "type": "changed",
+          "description": "Skill updated via upload"
+        }
+      ]
+    },
+    {
+      "version": "1.14.0",
+      "date": "2026-08-18",
+      "changes": [
+        {
+          "type": "changed",
+          "description": "合并投递改为默认始终开启并重构分组策略：日期降序（新→旧）+ 同一天内 URL 长度升序（短→长）+ 贪心塞满 480 字符（不跨日期）；移除 --merge CLI 参数与 merge 函数参数"
+        },
+        {
+          "type": "fixed",
+          "description": "修复合并模式下 submitting 标记/中断回滚失效：mrec 为浅拷贝不在 records 内，导致 finally 兜底与 recover_stuck 找不到 submitting 原始记录、retry_count 不写回 → 提交前通过 merge_map 同步置组内原始记录 submitting 并累加 retry_count"
+        }
+      ]
+    },
+    {
+      "version": "1.13.0",
+      "date": "2026-08-18",
+      "changes": [
+        {
+          "type": "fixed",
+          "description": "--merge N 数值不生效（只被当开关、组大小走默认6）→ N 直接作为 group_size 传入 merge_records_to_queue，URL 超限递减兜底保留；移除 --group-size"
+        },
+        {
+          "type": "fixed",
+          "description": "run 子命令缺失 --base-url 与 --headless 参数（离线自测命令报 unrecognized arguments）→ 新增两参数，离线自测链路可跑通"
+        },
+        {
+          "type": "fixed",
+          "description": "marketplace.json 残留 install_source/installed_at/skill_id 本机安装状态字段 → 移除，发布包不再带单机时间戳/UUID"
+        },
+        {
+          "type": "fixed",
+          "description": "docstring/注释/打印文案 500→480 漂移（v1.10.0 改 480 未同步文档）→ 统一为 480"
+        },
+        {
+          "type": "fixed",
+          "description": "parse_math 不兼容纯数字验证码（fixture 固定答案 7 离线自测 OCR 必失败）→ 兼容纯数字答案 (n,None,None,n)"
+        },
+        {
+          "type": "changed",
+          "description": "export_results_excel 移除死参数 records；resolve_doc 路径解析优先按 data_dir 相对路径命中，避免误解析 cwd 同名文件"
+        },
+        {
+          "type": "added",
+          "description": "主动冷却（预防风控）：新增 --cool-every/--cool-seconds，默认每投递 10 组主动歇 300 秒，抢在服务端验证码风控前降速；--cool-every 0 关闭"
+        }
+      ]
+    },
+    {
+      "version": "1.12.0",
+      "date": "2026-08-17",
+      "changes": [
+        {
+          "type": "changed",
+          "description": "验证码 OCR 引擎由百度云 accurate_basic 替换为 PaddleOCR 在线 API（PP-OCRv6）：删除 scripts/cloud_ocr.default.json 内嵌凭据与 baidu_ocr_* 实现，改为环境变量 PADDLEOCR_ACCESS_TOKEN 配置（不落文件、不入 git），本机仍不安装识别模型；识别失败自动转人工输入"
+        }
+      ]
+    },
+    {
+      "version": "1.11.0",
+      "date": "2026-08-14",
+      "changes": [
+        {
+          "type": "changed",
+          "description": "Skill updated via upload"
+        }
+      ]
+    },
+    {
+      "version": "1.10.0",
+      "date": "2026-08-13",
+      "changes": [
+        {
+          "type": "changed",
+          "description": "Skill updated via upload"
+        }
+      ]
+    },
+    {
+      "version": "1.10.0",
+      "date": "2026-08-13",
+      "changes": [
+        {
+          "type": "fixed",
+          "description": "【关键】验证码永远\"验证码错误\"：get_captcha_bytes 原优先 page.request.get(src) 重新下载验证码图，服务端每次请求生成新验证码，识别图与提交校验图不一致 → 改为优先 el.screenshot() 截取页面当前图（与提交绑定一致），实测 20 组提交全部一次通过；纠正 v1.5.0 起错误结论（troubleshooting 1.2/1.3、SKILL.md）"
+        },
+        {
+          "type": "fixed",
+          "description": "服务端\"无效长度url\"：前端 targetUrl 校验限 500 字符但服务端更严（实测 495 拒/481 过），合并组默认 group_size 8→6、url_max 500→480（group_records_by_date/merge_records_to_queue/run_batch 默认值及 sheqi.py a.merge or 8→6）"
+        },
+        {
+          "type": "changed",
+          "description": "SKILL.md 合并投递示例 --merge 8 → --merge 6，关键约定补充服务端 480 实测限制"
+        },
+        {
+          "type": "added",
+          "description": "references/troubleshooting.md 新增五.7\"无效长度url\"排查节；7.2 增加验证码正确性三步验证法"
+        }
+      ]
+    },
+    {
+      "version": "1.9.2",
+      "date": "2026-08-13",
+      "changes": [
+        {
+          "type": "changed",
+          "description": "Skill updated via upload"
+        }
+      ]
+    },
+    {
+      "version": "1.9.2",
+      "date": "2026-08-13",
+      "changes": [
+        {
+          "type": "added",
+          "description": "合并模式（--merge N）每组提交前自动动态生成该组举报信（内容含组内全部 URL，写入 documents/<主体名>/ 并注册为 letter），无需手工逐条生成；generate_letter 支持组内多 URL"
+        },
+        {
+          "type": "fixed",
+          "description": "修正发布包：v1.9.1 zip 未包含最新 sheqi_lib.py（wait_result 明确错误立即返回、alert/confirm 分离、run_batch 动态举报信等代码）且缺 SKILL.md，本版打包完整修复代码并补齐 SKILL.md 根文档"
+        },
+        {
+          "type": "changed",
+          "description": "SKILL.md 工作流/关键约定补充合并模式动态生成举报信说明"
+        }
+      ]
+    },
+    {
+      "version": "1.9.1",
+      "date": "2026-08-13",
+      "changes": [
+        {
+          "type": "fixed",
+          "description": "subject set 仅切换主体不更新字段 → 现支持带 --industry 等字段参数时更新档案（无字段参数仍仅切换）"
+        },
+        {
+          "type": "fixed",
+          "description": "wait_result 将 confirm 确认弹窗（JBTX）误判为提交错误 → 现区分 alert（真错误，立即返回）与 confirm（返回 true 继续提交），避免把确认文本当错误"
+        },
+        {
+          "type": "fixed",
+          "description": "dry-run 未校验行业分类（12377 必填，缺失提交时提示请选择行业分类）→ 现 dry-run 检测缺失即 [BLOCKED] 拦截并给出修复命令"
+        },
+        {
+          "type": "fixed",
+          "description": "12377 提交校验要求 4 个上传槽位全部非空，原逻辑卡槽4可留空导致“附件不能为空” → SKILL.md/form-guide 注明须填满4槽位（无多余举报信时复制 letter 到 letter2）"
+        },
+        {
+          "type": "changed",
+          "description": "wait_result 收到非验证码/上限的校验 alert（如请选择行业分类、附件不能为空）时立即返回明确错误，不再空等到超时"
+        }
+      ]
+    },
+    {
+      "version": "1.9.0",
+      "date": "2026-08-13",
+      "changes": [
+        {
+          "type": "added",
+          "description": "dry-run 新增表单值 dump：填表后把关键字段值（主体/联系人/被举报名称/链接/内容/企业类型/上传文件等）导出为 logs/dry_run_<id>.txt，无需对截图做 OCR 即可核对表单"
+        },
+        {
+          "type": "changed",
+          "description": "SKILL.md 补充 dry-run 表单值文本说明与数据目录清单"
+        }
+      ]
+    },
+    {
+      "version": "1.7.3",
+      "date": "2026-08-12",
+      "changes": [
+        {
+          "type": "changed",
+          "description": "Skill updated via upload"
+        }
+      ]
+    },
+    {
+      "version": "1.7.3",
+      "date": "2026-08-13",
+      "changes": [
+        {
+          "type": "added",
+          "description": "新增 recover 子命令：将中断/崩溃后卡死的 submitting 记录批量恢复为 pending；run_batch finally 兜底自动回滚，杜绝记录永久卡死无法重跑"
+        },
+        {
+          "type": "fixed",
+          "description": "dry-run 缺必需材料（营业执照/身份证正反面/授权委托书）时输出 [BLOCKED] 并以退出码 2 终止，补全材料后重跑"
+        },
+        {
+          "type": "fixed",
+          "description": "OCR 异常日志脱敏（_redact_cred），百度云 token URL 中的 ak/sk/access_token 不再可能落入 stdout/stderr"
+        },
+        {
+          "type": "changed",
+          "description": "SKILL.md 补 venv 解释器用法、浏览器前置条件（Edge/Chrome 或 playwright install chromium）、--merge 下 --from 参照系警告、降频示例修正（15→30→60…上限600s）、敏感数据清单扩大（records.json/paste_*.txt）、内嵌共享凭据风险披露"
+        }
+      ]
+    },
+    {
+      "version": "1.7.2",
+      "date": "2026-08-12",
+      "changes": [
+        {
+          "type": "removed",
+          "description": "移除自建 ddddocr 云函数（scripts/cloud_ocr 目录、ocr-setup 子命令、cloud-ocr.md 部署文档），验证码识别仅用内嵌百度云凭据（cloud_ocr.default.json），开箱即用"
+        },
+        {
+          "type": "changed",
+          "description": "baidu_ocr_ak_sk 只用内嵌凭据（scripts/cloud_ocr.default.json），不再读环境变量/baidu_ocr.json，彻底消除旧凭据残留导致的 401"
+        },
+        {
+          "type": "removed",
+          "description": "cloud_ocr.default.json 去掉 provision_url，只保留 ak/sk"
+        }
+      ]
+    },
+    {
+      "version": "1.7.1",
+      "date": "2026-08-12",
+      "changes": [
+        {
+          "type": "fixed",
+          "description": "--merge N 现在直接决定合并组大小（原先被未文档化的 --group-size 覆盖）；移除 --group-size"
+        },
+        {
+          "type": "fixed",
+          "description": "上传槽位对齐文档：在职证明(work_proof)移至 upload_file4，upload_file2 只含身份证/授权委托书等身份材料；--file 帮助补齐 hand_id/letter_dup/letter2/letter3"
+        },
+        {
+          "type": "fixed",
+          "description": "清理元数据：SKILL.md frontmatter 只保留 name/description；marketplace.json 移除本机安装状态字段；删除与 SKILL.md 重复的 AGENTS.md"
+        },
+        {
+          "type": "fixed",
+          "description": "setup 支持 Windows/macOS/Linux（按平台选择 venv 解释器路径），与兼容性声明一致"
+        },
+        {
+          "type": "fixed",
+          "description": "提交响应监听挂在浏览器 context 上并在每次尝试前清空旧响应，避免切标签页后漏判或误读旧响应"
+        },
+        {
+          "type": "changed",
+          "description": "文档去重与对齐：合并/名称填满/内容模板/导出规则收敛到 SKILL.md；import 列名别名表与代码同步；移除死代码 join_names 与无效的 min_group 参数"
+        }
+      ]
+    },
+    {
+      "version": "1.7.0",
+      "date": "2026-08-12",
+      "changes": [
+        {
+          "type": "added",
+          "description": "验证码风控自适应降频：连续3次验证码错误自动将组间隔翻倍（60→120→240…）并冷却，成功即清零计数，无需人工干预"
+        },
+        {
+          "type": "added",
+          "description": "名称填满策略：合并组内平台/账号名去重顿号拼接尽量填满50字，超长从尾部逐个删除直到可行；源数据首尾顿号自动清理"
+        },
+        {
+          "type": "added",
+          "description": "具体举报内容模板：run 前检查 sheqi_data/content_template.txt（或 --content-file），存在且非空则全部投递使用模板，为空/不存在自动整合"
+        }
+      ]
+    },
+    {
+      "version": "1.6.0",
+      "date": "2026-08-12",
+      "changes": [
+        {
+          "type": "added",
+          "description": "新增 export 子命令：导出指定日期（默认今天）已提交记录为 Excel（含审核码/查询码），保存到 sheqi_data/reports/今日提交_YYYY-MM-DD.xlsx，作为批量跑完后最后一步归档对账"
+        }
+      ]
+    },
+    {
+      "version": "1.5.1",
+      "date": "2026-08-12",
+      "changes": [
+        {
+          "type": "fixed",
+          "description": "云盾保护页验证码支持全形态：数学算式（填计算结果，如 4×6=? → 24）、字母、中文词语；算式识别增加多路预处理兜底"
+        }
+      ]
+    },
+    {
+      "version": "1.5.0",
+      "date": "2026-08-12",
+      "changes": [
+        {
+          "type": "fixed",
+          "description": "表单页验证码识别：get_captcha_bytes 优先用 page.request 下载 #verifycode_id.src 原图（130x48），el.screenshot() 小图（95x43）识别率极低导致识别失败"
+        },
+        {
+          "type": "added",
+          "description": "新增 references/troubleshooting.md：沉淀验证码抓图、OCR 凭据 401、Windows 进程管理、表单跳转链路、12377 三层防护、每日上限、截图 bug 等实战踩坑与排查手册"
+        },
+        {
+          "type": "fixed",
+          "description": "baidu_ocr_ak_sk 增加 skill 默认配置 cloud_ocr.default.json 兜底，避免环境变量残留旧 AK/SK 导致 401"
+        }
+      ]
+    },
+    {
+      "version": "1.4.4",
+      "date": "2026-08-11",
+      "changes": [
+        {
+          "type": "changed",
+          "description": "Skill updated via upload"
+        }
+      ]
+    }
+  ],
+  "is_public": true,
+  "updatedAt": "2026-08-18T07:45:00"
+}

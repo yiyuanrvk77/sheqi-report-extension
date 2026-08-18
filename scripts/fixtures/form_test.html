@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>测试页 - 模拟 12377 涉企举报表单</title>
+<style>
+  body { font-family: "Microsoft YaHei", sans-serif; padding: 20px; }
+  .row { margin-bottom: 10px; }
+  label { display: inline-block; width: 140px; }
+  input, select, textarea { width: 320px; padding: 4px; box-sizing: border-box; }
+  .nice-select { display: inline-block; border: 1px solid #aaa; padding: 4px 10px; cursor: pointer; min-width: 180px; position: relative; background: #fff; }
+  .nice-select ul { display: none; position: absolute; left: 0; right: 0; background: #fff; border: 1px solid #aaa; list-style: none; margin: 4px 0 0; padding: 0; z-index: 10; max-height: 200px; overflow: auto; }
+  .nice-select.open ul { display: block; }
+  .nice-select li { padding: 4px 8px; }
+  .nice-select li:hover { background: #eef; }
+  .nice-select li.selected { background: #ddf; }
+  button { padding: 8px 20px; margin-top: 6px; }
+  #msg { color: #c00; }
+</style>
+</head>
+<body>
+<div id="page">
+  <div id="disclaimer">
+    <h1>违法和不良信息举报中心（模拟）</h1>
+    <p>须知内容……</p>
+    <p><input type="checkbox" id="isee" /> 我已阅读并同意</p>
+    <button id="agree">同意</button>
+    <div id="msg"></div>
+  </div>
+</div>
+
+<script type="text/template" id="formTpl">
+  <h2>涉企侵权举报（模拟表单）</h2>
+  <div class="row"><label>企业名称</label><input id="entName"></div>
+  <div class="row"><label>企业类型</label>
+    <select id="entType" style="display:none">
+      <option value="o">请选择</option><option value="GUOYOUQIYE">国有企业</option>
+      <option value="MINYINGQIYE">民营企业</option><option value="WAIZIQIYE">外资企业</option>
+      <option value="QITAQIYE">其他企业</option>
+    </select>
+    <div class="nice-select"><span class="current">请选择</span><ul></ul></div>
+  </div>
+  <div class="row"><label>企业性质</label>
+    <select id="entNature" style="display:none">
+      <option value="o">请选择</option><option value="SHANGSHIQIYE">上市企业</option>
+      <option value="NISHANGSHIQIYE">拟上市企业</option><option value="QITAQIYE">其他企业</option>
+    </select>
+    <div class="nice-select"><span class="current">请选择</span><ul></ul></div>
+  </div>
+  <div class="row"><label>行业分类</label>
+    <select id="entIndustry" style="display:none">
+      <option value="o">请选择</option><option value="I001">农、林、牧、渔业</option>
+      <option value="I002">采矿业</option><option value="I003">制造业</option>
+      <option value="I004">电力、热力、燃气及水生产和供应业</option>
+    </select>
+    <div class="nice-select"><span class="current">请选择</span><ul></ul></div>
+  </div>
+  <div class="row"><label>联系人身份</label>
+    <select id="entContactType" style="display:none">
+      <option value="o">请选择</option><option value="LAWYER">企业法务或委托律师</option>
+      <option value="QITARENYUAN">企业其他工作人员</option>
+    </select>
+    <div class="nice-select"><span class="current">请选择</span><ul></ul></div>
+  </div>
+  <div class="row"><label>营业执照</label><input type="file" id="upload_file1"></div>
+  <div class="row"><label>身份证/授权书/在职证明</label><input type="file" id="upload_file2"></div>
+  <div class="row"><label>联系人姓名</label><input id="reportor_realname"></div>
+  <div class="row"><label>联系电话</label><input id="reportor_telephone"></div>
+  <div class="row"><label>电子邮箱</label><input id="reportor_email"></div>
+  <div class="row"><label>举报网站名称</label><input id="targetName"></div>
+  <div class="row"><label>举报账号名称</label><input id="targetAccount"></div>
+  <div class="row"><label>举报网址</label><textarea id="targetUrl"></textarea></div>
+  <div class="row"><label>举报内容</label><textarea id="content"></textarea></div>
+  <div class="row"><label>举报信函</label><input type="file" id="upload_file3"></div>
+  <div class="row"><label>证据种类</label>
+    <select id="entProofType" multiple style="display:none">
+      <option value="P001">法院判决书</option><option value="P008">其他能够证明举报信息内容构成侵权的材料</option>
+    </select>
+    <div class="nice-select"><span class="current">请选择</span><ul></ul></div>
+  </div>
+  <div class="row"><label>举报信（多份）</label><input type="file" id="upload_file4"></div>
+  <div class="row"><label>验证码</label><img id="verifycode_id" width="100" height="40" alt="captcha"><input id="verify_code"></div>
+  <button id="btn_submit">提交</button>
+  <div id="msg"></div>
+</script>
+
+<script>
+  // ---------- 须知页 ----------
+  document.getElementById("agree").addEventListener("click", function () {
+    if (!document.getElementById("isee").checked) {
+      document.getElementById("msg").textContent = "请先勾选同意";
+      return;
+    }
+    document.getElementById("page").innerHTML = document.getElementById("formTpl").innerHTML;
+    window.__agreed = true;
+    initForm();
+  });
+
+  function initForm() {
+    window.fileMap1 = new Map(); window.fileMap2 = new Map();
+    window.fileMap3 = new Map(); window.fileMap4 = new Map();
+
+    // nice-select 初始化
+    document.querySelectorAll("select").forEach(function (sel) {
+      var nice = sel.nextElementSibling;
+      if (!nice || !nice.classList.contains("nice-select")) return;
+      var ul = nice.querySelector("ul");
+      Array.from(sel.options).forEach(function (opt) {
+        var li = document.createElement("li");
+        li.textContent = opt.text;
+        li.setAttribute("data-value", opt.value);
+        ul.appendChild(li);
+      });
+      nice.querySelector(".current").addEventListener("click", function () {
+        nice.classList.toggle("open");
+      });
+      ul.addEventListener("click", function (e) {
+        var li = e.target.closest("li");
+        if (!li) return;
+        var v = li.getAttribute("data-value");
+        if (sel.multiple) {
+          li.classList.toggle("selected");
+          var vals = Array.from(sel.selectedOptions).map(function (o) { return o.value; });
+          var i = vals.indexOf(v);
+          if (i >= 0) vals.splice(i, 1); else vals.push(v);
+          Array.from(sel.options).forEach(function (o) { o.selected = vals.indexOf(o.value) >= 0; });
+        } else {
+          li.classList.add("selected");
+          Array.from(ul.children).forEach(function (x) { if (x !== li) x.classList.remove("selected"); });
+          nice.querySelector(".current").textContent = li.textContent;
+          sel.value = v;
+          nice.classList.remove("open");
+        }
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+    });
+
+    // 文件上传模拟
+    function bindUpload(inputId, map) {
+      document.getElementById(inputId).addEventListener("change", function () {
+        map.clear();
+        Array.from(this.files).forEach(function (f) { map.set(f.name, f); });
+        document.getElementById("msg").textContent = inputId + " 已上传 " + map.size + " 个文件";
+      });
+    }
+    bindUpload("upload_file1", window.fileMap1);
+    bindUpload("upload_file2", window.fileMap2);
+    bindUpload("upload_file3", window.fileMap3);
+    bindUpload("upload_file4", window.fileMap4);
+
+    // 验证码（固定答案 7；图片由 fixtures/captcha.png 提供，OCR 可稳定识别）
+    var cap = document.getElementById("verifycode_id");
+    function capSrc() {
+      return "captcha.png?t=" + Date.now();
+    }
+    cap.src = capSrc();
+    cap.addEventListener("click", function () { cap.src = capSrc(); });
+
+    // 提交
+    window.submitreportinfo = function () {
+      var vals = {};
+      ["entName","entType","entNature","entIndustry","entContactType","reportor_realname",
+       "reportor_telephone","reportor_email","targetName","targetAccount","targetUrl","content",
+       "entProofType","verify_code"].forEach(function (id) {
+        var el = document.getElementById(id);
+        vals[id] = el.multiple ? Array.from(el.selectedOptions).map(function (o) { return o.value; }).join(",") : el.value;
+      });
+      if (!/^https?:\/\//.test(vals.targetUrl)) { alert("URL格式错误"); return; }
+      if (vals.content.length > 500) { alert("举报内容不能超过500字"); return; }
+      if (vals.verify_code !== "7") { alert("验证码错误"); return; }
+      if (window.fileMap1.size < 1 || window.fileMap2.size < 1 || window.fileMap3.size < 1) {
+        alert("请上传完整材料（卡槽1-3必填）"); return;
+      }
+      document.body.innerHTML = '<h1>举报结果（模拟）</h1><p>举报成功！查询码: XTEST12345678</p><p>企业：' + vals.entName + '</p><p>平台：' + vals.targetName + '</p>';
+      history.pushState({}, "", "/jbhz.html");
+    };
+    document.getElementById("btn_submit").addEventListener("click", function () { window.submitreportinfo(); });
+  }
+</script>
+</body>
+</html>
